@@ -51,11 +51,16 @@ echo
 echo "Adding new origin in $ORG organization"
 git remote add origin https://github.com/$ORG/$REPO_NAME
 
+# fetch all branches and tags
+git checkout --detach
+git fetch upstream '+refs/heads/*:refs/heads/*'
+git checkout master
+
 # https://developer.github.com/v3/repos/#create-an-organization-repository
 # create the repo in the forked organization:
 d_json=$(echo '{"name":"'"$REPO_NAME"'","description":"Fork from '"$UPS_ORG/$REPO_NAME"'"}')
 echo $d_json
 curl -u "gcomoretto" https://api.github.com/orgs/gcmshadow/repos -d "$d_json"
 
-# git push --all origin master
-# git push --tags
+git push --all origin
+git push --tags origin

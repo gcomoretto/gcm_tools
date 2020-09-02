@@ -4,6 +4,7 @@
 
 usage() { echo "Usage: $0 -o <upstream organization>"  1>&2; exit 1; }
 
+UPS_ORG=
 
 while getopts "o:h" opt; do
   case "$opt" in
@@ -14,12 +15,17 @@ while getopts "o:h" opt; do
     usage
     ;;
   *)
-    echo "wrong input option"
+    echo "Wrong input option"
     usage
     ;;
   esac
 done
 shift $((OPTIND-1))
+
+if [[ -z $UPS_ORG ]]; then
+  echo "Missing input parameter"
+  usage
+fi
 
 REPO=$(basename -s .git `git config --get remote.origin.url`)
 ORG=$(git remote get-url origin | awk -F '/' '{print $4}')
@@ -47,12 +53,17 @@ if ! UURL=$(git remote get-url upstream); then
   echo "Adding upstream repo https://github.com/${UPS_ORG}/${REPO}"
   git remote add upstream "https://github.com/${UPS_ORG}/${REPO}"
 else
-  echo "Upstram repo already configure as ${UURL}"
+  echo "Upstream repo already configure as ${UURL}"
 fi
 
 echo
 echo "git pull upstream master"
-git pull --all
+git pull --all upstream
+# fetch all branches and tags
+git checkout --detach
+git fetch upstream '+refs/heads/*:refs/heads/*'
+git checkout master
+
 
 echo
 echo "git rebase upstream/master"
@@ -62,4 +73,3 @@ echo
 echo "git push origin master"
 git push --all origin
 git push --tags origin
-#git push origin master
