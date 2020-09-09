@@ -30,6 +30,11 @@ fi
 REPO=$(basename -s .git `git config --get remote.origin.url`)
 ORG=$(git remote get-url origin | awk -F '/' '{print $4}')
 
+if [ ! -d ".git" ]; then
+  echo "Not a git repository"
+  exit 1
+fi
+
 if [ "$ORG" == "$UPS_ORG" ]; then
   echo "Can't update on the same org"
   exit -1
@@ -57,8 +62,8 @@ else
 fi
 
 echo
-echo "git pull upstream master"
-git pull --all upstream
+echo "git pull --all"
+git pull --all
 # fetch all branches and tags
 git checkout --detach
 git fetch upstream '+refs/heads/*:refs/heads/*'
