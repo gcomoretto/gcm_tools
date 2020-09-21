@@ -78,3 +78,5 @@ echo
 echo "git push origin master"
 git push --all origin
 git push --tags origin
+
+git remote rm upstream

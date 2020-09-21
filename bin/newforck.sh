@@ -64,3 +64,5 @@ curl -u "gcomoretto" https://api.github.com/orgs/gcmshadow/repos -d "$d_json"
 
 git push --all origin
 git push --tags origin
+
+git remote rm upstream
