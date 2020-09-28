@@ -8,9 +8,94 @@ usage() {
   exit 1
 }
 
+
+config_curl() {
+  # Prefer system curl; user-installed ones sometimes behave oddly
+  if [[ -x /usr/bin/curl ]]; then
+    CURL=${CURL:-/usr/bin/curl}
+  else
+    CURL=${CURL:-curl}
+  fi
+
+  # disable curl progress meter unless running under a tty -- this is intended to
+  # reduce the amount of console output when running under CI
+  CURL_OPTS=('-#')
+  if [[ ! -t 1 ]]; then
+    CURL_OPTS=('-sS')
+  fi
+
+  # curl will exit 0 on 404 without the fail flag
+  CURL_OPTS+=('--fail')
+}
+
+
+update_repo() {
+  local gitrepo="https://github.com/${SHD_ORG}/${repo}"
+  local upsrepo="https://github.com/${UPS_ORG}/${repo}"
+  # if upstream do not exists, return
+  if ! $CURL --output /dev/null --silent --head --fail "$upsrepo"; then
+    echo  "  >>  No respository $repo found in $UPS_ORG organization"
+    return
+  fi 
+  i=$((i+1))
+  echo " -${i}- Updating repository: ${repo} ... "
+  if [ -d "$repo" ]; then
+    cd $repo
+    # check working dir is clean
+    if [ ! -z "$(git status --porcelain)" ]; then
+      echo "Wroking directory not clean"
+      return
+    fi
+    # checkout master and pull
+    echo "Checkout master and pull from remote"
+    git checkout master
+    git pull # not sure this is usefull, not expecting any changes in the forked repos
+  else
+    git clone "${gitrepo}" 
+    cd "${repo}"
+  fi
+
+  echo
+  # add upstream if not already there
+  if ! UURL=$(git remote get-url upstream) 2>/dev/null; then
+    echo "Adding upstream repo ${upsrepo}"
+    git remote add upstream "${upsrepo}"
+  else
+    echo "Upstream repo already configure as ${UURL}"
+  fi
+
+  echo
+  echo "git pull --all"
+  git pull --all
+  # fetch all branches and tags
+  git checkout --detach
+  git fetch upstream '+refs/heads/*:refs/heads/*'
+  git checkout master
+
+  echo
+  echo "git rebase upstream/master"
+  git rebase upstream/master
+
+  git remote rm upstream
+
+  echo
+  echo "git push origin master"
+  git push --all origin
+  git push --tags origin
+
+  cd ..
+}
+
+#################################################
+# main
+
+config_curl
+
 UPS_ORG=
 SHD_ORG=
 BRANCH=
+
+skip="lsstsw repos"
 
 while getopts "o:d:b:h" opt; do
   case "$opt" in
@@ -52,62 +137,20 @@ if [[ $SHD_ORG == $UPS_ORG ]]; then
   usage
 fi
 
-list=$(curl "https://api.github.com/users/gcmshadow/repos?page+1&per_page=100" | grep -e 'git_url*' | grep gcmshadow| awk -F '"' '{ print $4 }' | awk -F '/' '{ print $5 }' | awk -F '.' '{ print $1 }')
+# from https://gist.github.com/erdincay/4f1d2e092c50e78ae1ffa39d13fa404e
+list=$($CURL -s "https://api.github.com/users/gcmshadow/repos?page+1&per_page=100" | grep -e 'git_url*' | grep gcmshadow| awk -F '"' '{ print $4 }' | awk -F '/' '{ print $5 }' | awk -F '.' '{ print $1 }')
+repos_list=($list)
+echo "Found $(echo $list |wc -w) repositories in ${SHD_ORG} organization"
 
-echo $list
+mkdir -p $SHD_ORG
+
+cd $SHD_ORG
+i=0
+for repo in "${repos_list[@]}"; do
+  if [[ ! ${skip} =~ ${repo} ]]; then
+    update_repo
+  fi
+done
 
 exit
 
-REPO=$(basename -s .git `git config --get remote.origin.url`)
-ORG=$(git remote get-url origin | awk -F '/' '{print $4}')
-
-if [ ! -d ".git" ]; then
-  echo "Not a git repository"
-  exit 1
-fi
-
-if [ "$ORG" == "$UPS_ORG" ]; then
-  echo "Can't update on the same org"
-  exit -1
-fi
-echo "Updating repository $ORG/$REPO from upstream organization $UPS_ORG"
-
-# check working dir is clean
-if [ ! -z "$(git status --porcelain)" ]; then
-  echo "Wroking directory not clean"
-  exit
-fi
-
-# checkout master and pull
-echo "Checkout master and pull from remote"
-git checkout master
-git pull
-
-echo
-# add upstream if not already there
-if ! UURL=$(git remote get-url upstream); then
-  echo "Adding upstream repo https://github.com/${UPS_ORG}/${REPO}"
-  git remote add upstream "https://github.com/${UPS_ORG}/${REPO}"
-else
-  echo "Upstream repo already configure as ${UURL}"
-fi
-
-echo
-echo "git pull --all"
-git pull --all
-# fetch all branches and tags
-git checkout --detach
-git fetch upstream '+refs/heads/*:refs/heads/*'
-git checkout master
-
-
-echo
-echo "git rebase upstream/master"
-git rebase upstream/master
-
-echo
-echo "git push origin master"
-git push --all origin
-git push --tags origin
-
-git remote rm upstream
