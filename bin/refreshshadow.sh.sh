@@ -89,7 +89,7 @@ update_repo() {
   git log -n 1
   echo 
 
-  if [[ -z $BRANCH]]; then
+  if [[ -z $BRANCH ]]; then
     echo $BRANCH
   fi
 
