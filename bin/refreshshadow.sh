@@ -190,7 +190,7 @@ if [[ $SHD_ORG == $UPS_ORG ]]; then
 fi
 
 echo "Update repos forked in $SHD_ORG organization from $UPS_ORG"
-if [[ "$BRANCH" != ""]]; then
+if [[ "$BRANCH" != "" ]]; then
   echo "Rebase branch $BRANCH to latest master (or ref)." 
 fi
 
