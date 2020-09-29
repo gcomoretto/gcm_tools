@@ -51,19 +51,21 @@ update_repo() {
   fi 
   i=$((i+1))
   logfile="updste_${repo}_fork.log"
-  > ${logfile}
   echo "  -${i}-   Updating repository: ${repo}   ... "
   if [ -d "$repo" ]; then
     cd $repo
+    > ${logfile}
     # check working dir is clean
     if [ ! -z "$(git status --porcelain)" ]; then
       echo "Wroking directory not clean"
+      cd ..
       return
     fi
     run git checkout master 
   else
     git clone "${gitrepo}" 
     cd "${repo}"
+    > ${logfile}
   fi
 
   echo
