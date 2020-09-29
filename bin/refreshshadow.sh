@@ -56,7 +56,7 @@ update_repo() {
     cd $repo
     > ${logfile}
     # check working dir is clean
-    if [ ! -z "$(git status --porcelain)" ]; then
+    if [ ! -z "$(git status --porcelain -uno)" ]; then
       echo "Wroking directory not clean"
       cd ..
       return
