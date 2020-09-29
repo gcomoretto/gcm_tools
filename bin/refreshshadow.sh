@@ -76,7 +76,8 @@ update_repo() {
     return
   fi 
   i=$((i+1))
-  logfile="updste_${repo}_fork.log"
+  logfile="update_${repo}_fork.log"
+  echo
   echo "  -${i}-   Updating repository: ${repo}   ... "
   repos_array=($repos_yaml)
   for entry in "${repos_array[@]}"; do
@@ -127,7 +128,7 @@ update_repo() {
   echo 
 
     if [[ "$BRANCH" != "" ]]; then
-      if [ "$(git checkout $BRANCH)" ]; then
+      if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
         run git config user.email "docs-ci@lsst.org"
         run git config user.name "Docs CI"
         branchhead=$(git rev-parse HEAD)
