@@ -9,6 +9,15 @@ usage() {
 }
 
 
+run() {
+  elif [[ $DEBUG == true ]]; then
+    (set -x; "$@")
+  else
+    "$@"
+  fi
+}
+
+
 config_curl() {
   # Prefer system curl; user-installed ones sometimes behave oddly
   if [[ -x /usr/bin/curl ]]; then
@@ -48,12 +57,10 @@ update_repo() {
     fi
     # checkout master and pull
     echo "Checkout master and pull from remote"
-    git checkout master 
-    # not sure this is usefull, not expecting any changes in the forked repos
-    git pull 
+    run git checkout master 
   else
     echo "Clone repository" 
-    git clone "${gitrepo}" 
+    run git clone "${gitrepo}" 
     cd "${repo}"
   fi
 
@@ -61,31 +68,31 @@ update_repo() {
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
     echo "Adding upstream repo ${upsrepo}"
-    git remote add upstream "${upsrepo}"
+    run git remote add upstream "${upsrepo}"
   else
     echo "Upstream repo already configure as ${UURL}"
   fi
 
   echo
   echo "git pull --all"
-  git pull --all
+  run git pull --all
   # fetch all branches and tags
-  git checkout --detach
-  git fetch upstream '+refs/heads/*:refs/heads/*'
-  git checkout master
+  run git checkout --detach
+  run git fetch upstream '+refs/heads/*:refs/heads/*'
+  run git checkout master
 
   echo
   echo "git rebase upstream/master"
-  git rebase upstream/master
+  run git rebase upstream/master
 
-  git remote rm upstream
+  run git remote rm upstream
 
   echo
   echo "git push origin master"
-  git push -f --all origin
-  git push --tags origin
+  run git push -f --all origin
+  run git push --tags origin
   pwd
-  git log -n 1
+  run git log -n 1
   echo 
 
   if [[ -z $BRANCH ]]; then
