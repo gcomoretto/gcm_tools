@@ -41,6 +41,8 @@ run() {
   else
     echo "$@" >> "${logfile}" 2>&1
     "$@" >> "${logfile}" 2>&1
+    result=$?
+    echo $result
   fi
 }
 
@@ -128,17 +130,21 @@ update_repo() {
     if [[ "$BRANCH" != "" ]]; then
       if [ "$(git checkout $BRANCH)" ]; then
         branchhead=$(git rev-parse HEAD)
-        git rev-parse --abbrev-ref HEAD
+        #git rev-parse --abbrev-ref HEAD
         echo "$BRANCH at: $branchhead"
         run echo "Update branch $BRANCH"
+        result=0
         run git rebase "${ref}"
+        if [ "$result" -ne 0 ]; then
+          echo " !!!!!!   error rebasing"
+        fi
         branchafter=$(git rev-parse HEAD)
         if [[ "$branchhead" != "$branchafter" ]]; then
           echo "Now $BRANCH last commit is:"
           git log -n 1
+          exit
         fi
         echo 
-        exit
       fi 
     fi
 
@@ -196,9 +202,9 @@ if [[ $SHD_ORG == $UPS_ORG ]]; then
   usage
 fi
 echo
-echo " --> Update repos forked in $SHD_ORG organization from $UPS_ORG"
+echo " --> Update repos forked in '$SHD_ORG' organization from '$UPS_ORG' organization."
 if [[ "$BRANCH" != "" ]]; then
-  echo "     Rebase branch $BRANCH to latest master (or ref)." 
+  echo "     Rebase branch '$BRANCH' to latest master (or ref)." 
 fi
 echo
 
