@@ -127,9 +127,17 @@ update_repo() {
 
     if [[ "$BRANCH" != "" ]]; then
       if [ "$(git checkout $BRANCH)" ]; then
-        echo "Update branch $BRANCH"
+        branchhead=$(git rev-parse HEAD)
+        git rev-parse --abbrev-ref HEAD
+        echo "$BRANCH at: $branchhead"
         run echo "Update branch $BRANCH"
-        git status
+        run git rebase "${ref}"
+        branchafter=$(git rev-parse HEAD)
+        if [[ "$branchhead" != "$branchafter" ]]; then
+          echo "Now $BRANCH last commit is:"
+          git log -n 1
+        fi
+        echo 
         exit
       fi 
     fi
