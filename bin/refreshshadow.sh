@@ -110,7 +110,7 @@ update_repo() {
   run git push -f --all origin
   run git push --tags origin
   after=$(git rev-parse HEAD)
-  if [[ "$before" =! "$after" ]]; then
+  if [[ "$before" != "$after" ]]; then
     echo "Now last commit is:"
     git log -n 1
   fi
