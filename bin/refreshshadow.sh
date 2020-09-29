@@ -78,12 +78,10 @@ update_repo() {
   echo "  -${i}-   Updating repository: ${repo}   ... "
   repos_array=($repos_yaml)
   for entry in "${repos_array[@]}"; do
-     entry_name=$(echo $entry | awk -F'_' '{ print $1 }')
-     entry_ref=$(echo $entry | awk -F '"' '{ print $2}')
-     if [[ "$entry_name" == "$repo" ]]; then
-       ref=$entry_ref
-       echo "Main ref is $ref" 
-     fi
+    if [[ ${entry} =~ ${repo} ]]; then
+      ref=$(echo $entry | awk -F '"' '{ print $2}')
+      echo "Main ref is $ref" 
+    fi
   done
   if [ -d "$repo" ]; then
     cd $repo
@@ -113,7 +111,7 @@ update_repo() {
   run git checkout --detach
   run git fetch upstream '+refs/heads/*:refs/heads/*'
   run git checkout "${ref}"
-  run git rebase upstream/master
+  run git rebase upstream/"${ref}"
   run git remote rm upstream
   run git push -f --all origin
   run git push --tags origin
