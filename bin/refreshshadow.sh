@@ -78,8 +78,8 @@ update_repo() {
   echo "  -${i}-   Updating repository: ${repo}   ... "
   repos_array=($repos_yaml)
   for entry in "${repos_array[@]}"; do
-     entry_name=$(awk -F'_' '{ print $1 }')
-     entry_ref=$(awk -F '"' '{ print $2}')
+     entry_name=$(echo $entry | awk -F'_' '{ print $1 }')
+     entry_ref=$(echo $entry | awk -F '"' '{ print $2}')
      if [[ "$entry_name" == "$repo" ]]; then
        ref=$entry_ref
        echo "Main ref is $ref" 
