@@ -10,6 +10,7 @@ usage() {
 
 
 parse_repos_yaml() {
+  #https://stackoverflow.com/questions/5014632/how-can-i-parse-a-yaml-file-from-a-linux-shell-script
   filepath="${WORKDIR}/repos/etc/repos.yaml"
   local prefix=""
   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
@@ -121,12 +122,16 @@ update_repo() {
   if [[ "$before" != "$after" ]]; then
     echo "Now last commit is:"
     git log -n 1
+
+    if [[ -z $BRANCH ]]; then
+      if [ -z $(git checkout $BRANCH 2>/dev/null) ]; then
+        run echo "Update branch $BRANH"
+        git status
+        exit
+      fi 
+    fi
   fi
   echo 
-
-  if [[ -z $BRANCH ]]; then
-    echo $BRANCH
-  fi
 
   cd ..
 }
