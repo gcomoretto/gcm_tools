@@ -125,7 +125,7 @@ update_repo() {
   fi
   echo 
 
-    if [[ -z $BRANCH ]]; then
+    if [[ "$BRANCH" != "" ]]; then
       echo $BRANCH
       if [ -z $(git checkout $BRANCH) ]; then
         echo "Update branch $BRANCH"
@@ -145,7 +145,7 @@ config_curl
 
 UPS_ORG=
 SHD_ORG=
-BRANCH=
+BRANCH=""
 
 skip="lsstsw repos"
 
@@ -187,6 +187,11 @@ fi
 if [[ $SHD_ORG == $UPS_ORG ]]; then
   echo "Upstream org and shadow org cannot be the same."
   usage
+fi
+
+echo "Update repos forked in $SHD_ORG organization from $UPS_ORG"
+if [[ "$BRANCH" != ""]]; then
+  echo "Rebase branch $BRANCH to latest master (or ref)." 
 fi
 
 # from https://gist.github.com/erdincay/4f1d2e092c50e78ae1ffa39d13fa404e
