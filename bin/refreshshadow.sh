@@ -73,6 +73,7 @@ update_repo() {
   # if upstream do not exists, return
   if ! $CURL --output /dev/null --silent --head --fail "$upsrepo"; then
     echo  "  >>  No respository $repo found in $UPS_ORG organization"
+    echo
     return
   fi 
   i=$((i+1))
@@ -140,6 +141,7 @@ update_repo() {
         if [ "$result" -ne 0 ]; then
           echo " !!!!!!   error rebasing ($result) <<------------"
           echo
+          cd ..
           return
         fi
         branchafter=$(git rev-parse HEAD)
