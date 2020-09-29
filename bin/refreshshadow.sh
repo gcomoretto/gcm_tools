@@ -139,6 +139,7 @@ update_repo() {
         run git rebase "${ref}"
         if [ "$result" -ne 0 ]; then
           echo " !!!!!!   error rebasing ($result) <<------------"
+          echo
           return
         fi
         branchafter=$(git rev-parse HEAD)
@@ -148,8 +149,8 @@ update_repo() {
           run git push -f
           exit
         fi
-        echo 
       fi 
+      echo 
     fi
 
   cd ..
