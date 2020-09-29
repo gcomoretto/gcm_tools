@@ -15,8 +15,8 @@ run() {
   elif [[ $DEBUG == true ]]; then
     (set -x; "$@")
   else
-    echo "$@"
-    "$@"
+    echo "$@" >> "${logfile}"
+    "$@" >> "${logfile}"
   fi
 }
 
@@ -50,6 +50,8 @@ update_repo() {
     return
   fi 
   i=$((i+1))
+  logfile="updste_${repo}_fork.log"
+  > ${logfile}
   echo "  -${i}-   Updating repository: ${repo}   ... "
   if [ -d "$repo" ]; then
     cd $repo
@@ -58,44 +60,29 @@ update_repo() {
       echo "Wroking directory not clean"
       return
     fi
-    # checkout master and pull
-    echo "Checkout master and pull from remote"
     run git checkout master 
   else
-    echo "Clone repository" 
-    run git clone "${gitrepo}" 
+    git clone "${gitrepo}" 
     cd "${repo}"
   fi
 
   echo
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
-    echo "Adding upstream repo ${upsrepo}"
     run git remote add upstream "${upsrepo}"
   else
-    echo "Upstream repo already configure as ${UURL}"
+    run echo "Upstream repo already configure as ${UURL} (${upsrepo})"
   fi
-
-  echo
-  echo "git pull --all"
   run git pull --all
   # fetch all branches and tags
   run git checkout --detach
   run git fetch upstream '+refs/heads/*:refs/heads/*'
   run git checkout master
-
-  echo
-  echo "git rebase upstream/master"
   run git rebase upstream/master
-
   run git remote rm upstream
-
-  echo
-  echo "git push origin master"
   run git push -f --all origin
   run git push --tags origin
-  pwd
-  run git log -n 1
+  git log -n 1
   echo 
 
   if [[ -z $BRANCH ]]; then
