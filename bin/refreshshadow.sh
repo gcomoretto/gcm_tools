@@ -129,6 +129,8 @@ update_repo() {
 
     if [[ "$BRANCH" != "" ]]; then
       if [ "$(git checkout $BRANCH)" ]; then
+        run git config user.email "docs-ci@lsst.org"
+        run git config user.name "Docs CI"
         branchhead=$(git rev-parse HEAD)
         #git rev-parse --abbrev-ref HEAD
         echo "$BRANCH at: $branchhead"
@@ -137,6 +139,7 @@ update_repo() {
         run git rebase "${ref}"
         if [ "$result" -ne 0 ]; then
           echo " !!!!!!   error rebasing"
+          return
         fi
         branchafter=$(git rev-parse HEAD)
         if [[ "$branchhead" != "$branchafter" ]]; then
