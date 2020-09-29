@@ -24,7 +24,8 @@ parse_repos_yaml() {
         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
      }
-  }'
+  }' | grep "_ref"
+
 }
 
 
@@ -87,7 +88,6 @@ update_repo() {
     > ${logfile}
   fi
 
-  echo "Now at:"
   git rev-parse HEAD
   echo
   # add upstream if not already there
