@@ -15,8 +15,8 @@ run() {
   elif [[ $DEBUG == true ]]; then
     (set -x; "$@")
   else
-    echo "$@" >> "${logfile}"
-    "$@" >> "${logfile}"
+    echo "$@" >> "${logfile}" 2>&1
+    "$@" >> "${logfile}" 2>&1
   fi
 }
 
@@ -149,13 +149,13 @@ repos_list=($list)
 echo "Found $(echo $list |wc -w) repositories in ${SHD_ORG} organization"
 
 mkdir -p $SHD_ORG
+cd $SHD_ORG
+i=0
 
 # first update "repos"
 repo="repos"
 update_repo
 
-cd $SHD_ORG
-i=0
 for repo in "${repos_list[@]}"; do
   if [[ ! ${skip} =~ ${repo} ]]; then
     update_repo
