@@ -39,7 +39,6 @@ update_repo() {
   fi 
   i=$((i+1))
   echo "  -${i}-   Updating repository: ${repo}   ... "
-  (
   if [ -d "$repo" ]; then
     cd $repo
     # check working dir is clean
@@ -49,12 +48,12 @@ update_repo() {
     fi
     # checkout master and pull
     echo "Checkout master and pull from remote"
-    git checkout master
+    git checkout master 
     # not sure this is usefull, not expecting any changes in the forked repos
-    git pull
+    git pull 
   else
-    echo "Clone repository"
-    git clone "${gitrepo}"
+    echo "Clone repository" 
+    git clone "${gitrepo}" 
     cd "${repo}"
   fi
 
@@ -85,7 +84,6 @@ update_repo() {
   echo "git push origin master"
   git push -f --all origin
   git push --tags origin
-  ) > "update_${repo}_fork.log"
   pwd
   git log -n 1
   echo 
