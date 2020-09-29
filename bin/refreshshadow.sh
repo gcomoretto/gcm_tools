@@ -13,7 +13,7 @@ parse_repos_yaml() {
   filepath="${WORKDIR}/repos/etc/repos.yaml"
   local prefix=""
   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-  sed -ne "s|^\($s\):|\1|" \
+  repos_yaml=$(sed -ne "s|^\($s\):|\1|" \
        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $filepath |
   awk -F$fs '{
@@ -24,7 +24,8 @@ parse_repos_yaml() {
         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
      }
-  }' | grep "_ref"
+  }' | grep "_ref")
+  echo "${repos_yaml}"
 
 }
 
@@ -88,8 +89,8 @@ update_repo() {
     > ${logfile}
   fi
 
-  git rev-parse HEAD
-  echo
+  before=$(git rev-parse HEAD)
+  echo "At: ${before}"
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
     run git remote add upstream "${upsrepo}"
@@ -105,8 +106,11 @@ update_repo() {
   run git remote rm upstream
   run git push -f --all origin
   run git push --tags origin
-  echo "Last commit:"
-  git log -n 1
+  after=$(git rev-parse HEAD)
+  if [ "$b{efore}" =! "${after}" ]; then
+    echo "Now last commit is:"
+    git log -n 1
+  fi
   echo 
 
   if [[ -z $BRANCH ]]; then
