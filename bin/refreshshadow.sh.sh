@@ -38,7 +38,8 @@ update_repo() {
     return
   fi 
   i=$((i+1))
-  echo " -${i}- Updating repository: ${repo} ... "
+  echo "  -${i}-   Updating repository: ${repo}   ... "
+  (
   if [ -d "$repo" ]; then
     cd $repo
     # check working dir is clean
@@ -49,15 +50,17 @@ update_repo() {
     # checkout master and pull
     echo "Checkout master and pull from remote"
     git checkout master
-    git pull # not sure this is usefull, not expecting any changes in the forked repos
+    # not sure this is usefull, not expecting any changes in the forked repos
+    git pull
   else
-    git clone "${gitrepo}" 
+    echo "Clone repository"
+    git clone "${gitrepo}"
     cd "${repo}"
   fi
 
   echo
   # add upstream if not already there
-  if ! UURL=$(git remote get-url upstream) 2>/dev/null; then
+  if ! UURL=$(git remote get-url upstream 2>/dev/null); then
     echo "Adding upstream repo ${upsrepo}"
     git remote add upstream "${upsrepo}"
   else
@@ -80,8 +83,15 @@ update_repo() {
 
   echo
   echo "git push origin master"
-  git push --all origin
+  git push -f --all origin
   git push --tags origin
+  ) 2>&1 > "$update_{repo}_fork.log."
+  git log -n 1
+  echo 
+
+  if [[ -z $BRANCH]]; then
+    echo $BRANCH
+  fi
 
   cd ..
 }
@@ -143,6 +153,10 @@ repos_list=($list)
 echo "Found $(echo $list |wc -w) repositories in ${SHD_ORG} organization"
 
 mkdir -p $SHD_ORG
+
+# first update "repos"
+repo="repos"
+update_repo
 
 cd $SHD_ORG
 i=0
