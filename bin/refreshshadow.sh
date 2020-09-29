@@ -122,16 +122,18 @@ update_repo() {
   if [[ "$before" != "$after" ]]; then
     echo "Now last commit is:"
     git log -n 1
+  fi
+  echo 
 
     if [[ -z $BRANCH ]]; then
-      if [ -z $(git checkout $BRANCH 2>/dev/null) ]; then
-        run echo "Update branch $BRANH"
+      echo $BRANCH
+      if [ -z $(git checkout $BRANCH) ]; then
+        echo "Update branch $BRANCH"
+        run echo "Update branch $BRANCH"
         git status
         exit
       fi 
     fi
-  fi
-  echo 
 
   cd ..
 }
