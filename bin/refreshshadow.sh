@@ -25,7 +25,9 @@ parse_repos_yaml() {
         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
      }
   }' | grep "_ref")
+  echo "Found following repos with diffent master reference:"
   echo "${repos_yaml}"
+  echo
 
 }
 
@@ -65,6 +67,8 @@ config_curl() {
 update_repo() {
   local gitrepo="https://github.com/${SHD_ORG}/${repo}"
   local upsrepo="https://github.com/${UPS_ORG}/${repo}"
+  ref="master"
+  echo $repos_yaml | grep $repo
   # if upstream do not exists, return
   if ! $CURL --output /dev/null --silent --head --fail "$upsrepo"; then
     echo  "  >>  No respository $repo found in $UPS_ORG organization"
@@ -75,19 +79,18 @@ update_repo() {
   echo "  -${i}-   Updating repository: ${repo}   ... "
   if [ -d "$repo" ]; then
     cd $repo
-    > ${logfile}
     # check working dir is clean
     if [ ! -z "$(git status --porcelain -uno)" ]; then
       echo "Wroking directory not clean"
       cd ..
       return
     fi
-    run git checkout master 
   else
     git clone "${gitrepo}" 
     cd "${repo}"
-    > ${logfile}
   fi
+  > ${logfile}
+  run git checkout "${ref}" 
 
   before=$(git rev-parse HEAD)
   echo "At: ${before}"
@@ -101,13 +104,13 @@ update_repo() {
   # fetch all branches and tags
   run git checkout --detach
   run git fetch upstream '+refs/heads/*:refs/heads/*'
-  run git checkout master
+  run git checkout "${ref}"
   run git rebase upstream/master
   run git remote rm upstream
   run git push -f --all origin
   run git push --tags origin
   after=$(git rev-parse HEAD)
-  if [ "$b{efore}" =! "${after}" ]; then
+  if [[ "$before" =! "$after" ]]; then
     echo "Now last commit is:"
     git log -n 1
   fi
