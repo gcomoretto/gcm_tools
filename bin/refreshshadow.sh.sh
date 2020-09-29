@@ -15,6 +15,7 @@ run() {
   elif [[ $DEBUG == true ]]; then
     (set -x; "$@")
   else
+    echo "$@"
     "$@"
   fi
 }
