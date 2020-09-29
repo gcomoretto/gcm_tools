@@ -83,7 +83,7 @@ update_repo() {
     entry_repo=${entry_name%"_ref"} # remove suffuc
     if [[ ${entry_repo} == ${repo} ]]; then
       ref=$(echo $entry | awk -F '"' '{ print $2}')
-      echo "Main ref is $ref" 
+      #echo "Main ref is $ref" 
     fi
   done
   if [ -d "$repo" ]; then
@@ -102,7 +102,7 @@ update_repo() {
   run git checkout "${ref}" 
 
   before=$(git rev-parse HEAD)
-  echo "At: ${before}"
+  echo "${ref} at: ${before}"
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
     run git remote add upstream "${upsrepo}"
@@ -126,7 +126,7 @@ update_repo() {
   echo 
 
     if [[ "$BRANCH" != "" ]]; then
-      if [ -z "$(git checkout $BRANCH)" ]; then
+      if [ "$(git checkout $BRANCH)" ]; then
         echo "Update branch $BRANCH"
         run echo "Update branch $BRANCH"
         git status
