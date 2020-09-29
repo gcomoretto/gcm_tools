@@ -126,8 +126,7 @@ update_repo() {
   echo 
 
     if [[ "$BRANCH" != "" ]]; then
-      echo $BRANCH
-      if [ -z $(git checkout $BRANCH) ]; then
+      if [ -z "$(git checkout $BRANCH)" ]; then
         echo "Update branch $BRANCH"
         run echo "Update branch $BRANCH"
         git status
@@ -188,11 +187,12 @@ if [[ $SHD_ORG == $UPS_ORG ]]; then
   echo "Upstream org and shadow org cannot be the same."
   usage
 fi
-
-echo "Update repos forked in $SHD_ORG organization from $UPS_ORG"
+echo
+echo " --> Update repos forked in $SHD_ORG organization from $UPS_ORG"
 if [[ "$BRANCH" != "" ]]; then
-  echo "Rebase branch $BRANCH to latest master (or ref)." 
+  echo "     Rebase branch $BRANCH to latest master (or ref)." 
 fi
+echo
 
 # from https://gist.github.com/erdincay/4f1d2e092c50e78ae1ffa39d13fa404e
 list=$($CURL -s "https://api.github.com/users/gcmshadow/repos?page+1&per_page=100" | grep -e 'git_url*' | grep gcmshadow| awk -F '"' '{ print $4 }' | awk -F '/' '{ print $5 }' | awk -F '.' '{ print $1 }')
