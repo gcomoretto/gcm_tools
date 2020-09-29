@@ -68,7 +68,6 @@ update_repo() {
   local gitrepo="https://github.com/${SHD_ORG}/${repo}"
   local upsrepo="https://github.com/${UPS_ORG}/${repo}"
   ref="master"
-  echo $repos_yaml | grep $repo
   # if upstream do not exists, return
   if ! $CURL --output /dev/null --silent --head --fail "$upsrepo"; then
     echo  "  >>  No respository $repo found in $UPS_ORG organization"
@@ -77,6 +76,15 @@ update_repo() {
   i=$((i+1))
   logfile="updste_${repo}_fork.log"
   echo "  -${i}-   Updating repository: ${repo}   ... "
+  repos_array=($repos_yaml)
+  for entry in "${repos_array[@]}"; do
+     entry_name=$(awk -F'_' '{ print $1 }')
+     entry_ref=$(awk -F '"' '{ print $2}')
+     if [[ "$entry_name" == "$repo" ]]; then
+       ref=$entry_ref
+       echo "Main ref is $ref" 
+     fi
+  done
   if [ -d "$repo" ]; then
     cd $repo
     # check working dir is clean
