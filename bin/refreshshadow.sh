@@ -147,7 +147,9 @@ update_repo() {
           echo "Now $BRANCH last commit is:"
           git log -n 1
           run git push -f
-          exit
+          if [ "$result" -ne 0 ]; then
+            echo " !!!!!!   error pushing ($result) <<------------"
+          fi
         fi
       fi 
       echo 
