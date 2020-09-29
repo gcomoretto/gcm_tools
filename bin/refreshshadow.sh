@@ -9,6 +9,25 @@ usage() {
 }
 
 
+parse_repos_yaml() {
+  filepath="${WORKDIR}/repos/etc/respos.yaml"
+  local prefix=""
+  local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+  sed -ne "s|^\($s\):|\1|" \
+       -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+       -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $filepath |
+  awk -F$fs '{
+     indent = length($1)/2;
+     vname[indent] = $2;
+     for (i in vname) {if (i > indent) {delete vname[i]}}
+     if (length($3) > 0) {
+        vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+        printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+     }
+  }'
+}
+
+
 run() {
   if [[ $DRYRUN == true ]]; then
     echo "$@"
@@ -153,16 +172,17 @@ echo "Found $(echo $list |wc -w) repositories in ${SHD_ORG} organization"
 mkdir -p $SHD_ORG
 cd $SHD_ORG
 i=0
+WORKDIR=$(pwd)
 
 # first update "repos"
 repo="repos"
 update_repo
+
+parse_repos_yaml
 
 for repo in "${repos_list[@]}"; do
   if [[ ! ${skip} =~ ${repo} ]]; then
     update_repo
   fi
 done
-
-exit
 
