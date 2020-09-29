@@ -10,7 +10,7 @@ usage() {
 
 
 parse_repos_yaml() {
-  filepath="${WORKDIR}/repos/etc/respos.yaml"
+  filepath="${WORKDIR}/repos/etc/repos.yaml"
   local prefix=""
   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
   sed -ne "s|^\($s\):|\1|" \
@@ -87,6 +87,8 @@ update_repo() {
     > ${logfile}
   fi
 
+  echo "Now at:"
+  git rev-parse HEAD
   echo
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
@@ -103,6 +105,7 @@ update_repo() {
   run git remote rm upstream
   run git push -f --all origin
   run git push --tags origin
+  echo "Last commit:"
   git log -n 1
   echo 
 
