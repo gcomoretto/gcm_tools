@@ -10,6 +10,8 @@ usage() {
 
 
 run() {
+  if [[ $DRYRUN == true ]]; then
+    echo "$@"
   elif [[ $DEBUG == true ]]; then
     (set -x; "$@")
   else
