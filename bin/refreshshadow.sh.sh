@@ -85,7 +85,8 @@ update_repo() {
   echo "git push origin master"
   git push -f --all origin
   git push --tags origin
-  ) 2>&1 > "$update_{repo}_fork.log."
+  ) > "update_${repo}_fork.log"
+  pwd
   git log -n 1
   echo 
 
