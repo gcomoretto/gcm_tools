@@ -42,7 +42,6 @@ run() {
     echo "$@" >> "${logfile}" 2>&1
     "$@" >> "${logfile}" 2>&1
     result=$?
-    echo $result
   fi
 }
 
@@ -138,13 +137,14 @@ update_repo() {
         result=0
         run git rebase "${ref}"
         if [ "$result" -ne 0 ]; then
-          echo " !!!!!!   error rebasing"
+          echo " !!!!!!   error rebasing ($result) <<------------"
           return
         fi
         branchafter=$(git rev-parse HEAD)
         if [[ "$branchhead" != "$branchafter" ]]; then
           echo "Now $BRANCH last commit is:"
           git log -n 1
+          run git push -f
           exit
         fi
         echo 
