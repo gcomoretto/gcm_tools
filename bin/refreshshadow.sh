@@ -125,8 +125,6 @@ update_repo() {
   if [[ "$before" != "$after" ]]; then
     echo "Now last commit is:"
     git log -n 1
-  fi
-  echo 
 
     if [[ "$BRANCH" != "" ]]; then
       if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
@@ -156,6 +154,8 @@ update_repo() {
       fi 
       echo 
     fi
+  fi
+  echo 
 
   cd ..
 }
