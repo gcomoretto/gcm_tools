@@ -130,6 +130,7 @@ update_repo() {
       if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
         run git config user.email "docs-ci@lsst.org"
         run git config user.name "Docs CI"
+        run git pull
         branchhead=$(git rev-parse HEAD)
         #git rev-parse --abbrev-ref HEAD
         echo "$BRANCH at: $branchhead"
