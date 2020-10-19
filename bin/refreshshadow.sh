@@ -103,6 +103,7 @@ update_repo() {
   fi
   > ${logfile}
   run git checkout "${ref}" 
+  run git pull   # the fork may have been updated somewhere else
 
   before=$(git rev-parse HEAD)
   echo "${ref} at: ${before}"
