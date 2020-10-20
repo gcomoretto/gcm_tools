@@ -103,7 +103,6 @@ update_repo() {
   fi
   > ${logfile}
   run git checkout "${ref}" 
-  run git pull   # the fork may have been updated somewhere else
 
   before=$(git rev-parse HEAD)
   echo "${ref} at: ${before}"
@@ -128,10 +127,14 @@ update_repo() {
     git log -n 1
 
     if [[ "$BRANCH" != "" ]]; then
-      if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
+      # remove the BRANCH locally, should give an error if it does't exists
+      # this force to next checkout (inside the if condition)
+      # to checkout the BRANCH as it is in remote origin
+      run git branch -D $BRANCH
+      #if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
+      if [ "$(git checkout $BRANCH)" ]; then
         run git config user.email "docs-ci@lsst.org"
         run git config user.name "Docs CI"
-        run git pull
         branchhead=$(git rev-parse HEAD)
         #git rev-parse --abbrev-ref HEAD
         echo "$BRANCH at: $branchhead"
