@@ -135,6 +135,7 @@ update_repo() {
       if [ "$(git checkout $BRANCH)" ]; then
         run git config user.email "docs-ci@lsst.org"
         run git config user.name "Docs CI"
+        run git pull origin $BRANCH
         branchhead=$(git rev-parse HEAD)
         #git rev-parse --abbrev-ref HEAD
         echo "$BRANCH at: $branchhead"
