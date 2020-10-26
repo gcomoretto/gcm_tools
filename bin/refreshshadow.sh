@@ -106,6 +106,10 @@ update_repo() {
 
   before=$(git rev-parse HEAD)
   echo "${ref} at: ${before}"
+      # remove the BRANCH locally, should give an error if it does't exists
+      # this force to next checkout (inside the if condition)
+      # to checkout the BRANCH as it is in remote origin
+      run git branch -D $BRANCH
   # add upstream if not already there
   if ! UURL=$(git remote get-url upstream 2>/dev/null); then
     run git remote add upstream "${upsrepo}"
@@ -127,10 +131,6 @@ update_repo() {
     git log -n 1
 
     if [[ "$BRANCH" != "" ]]; then
-      # remove the BRANCH locally, should give an error if it does't exists
-      # this force to next checkout (inside the if condition)
-      # to checkout the BRANCH as it is in remote origin
-      run git branch -D $BRANCH
       #if [ "$(git checkout $BRANCH 2>/dev/null)" ]; then
       if [ "$(git checkout $BRANCH)" ]; then
         run git config user.email "docs-ci@lsst.org"
