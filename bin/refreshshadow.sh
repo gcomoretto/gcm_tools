@@ -26,7 +26,7 @@ parse_repos_yaml() {
         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
      }
   }' | grep "_ref")
-  echo "Found following repos with diffent master reference:"
+  echo "Found following repos with different master reference:"
   echo "${repos_yaml}"
   echo
 
